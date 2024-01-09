@@ -113,16 +113,16 @@ impl Game {
         self.board[y][x].is_flagged = !self.board[y][x].is_flagged;
     }
 
-    pub fn count_bombs(&self, x: usize, y: usize) -> i32 {
+    pub fn count_bombs(&self, center_x: usize, center_y: usize) -> i32 {
         let mut result = 0;
         for yi in -1..=1 {
-            let y2 = y as i32 + yi;
+            let y = center_y as i32 + yi;
             for xi in -1..=1 {
-                let x2 = x as i32 + xi;
-                if x2 < 0 || x2 >= BOARD_W || y2 < 0 || y2 >= BOARD_H {
+                let x = center_x as i32 + xi;
+                if x < 0 || x >= BOARD_W || y < 0 || y >= BOARD_H {
                     continue;
                 }
-                if self.board[y2 as usize][x2 as usize].is_bomb {
+                if self.board[y as usize][x as usize].is_bomb {
                     result += 1;
                 }
             }
