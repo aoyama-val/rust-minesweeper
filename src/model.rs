@@ -43,9 +43,9 @@ impl Game {
             .duration_since(time::UNIX_EPOCH)
             .expect("SystemTime before UNIX EPOCH!")
             .as_secs();
-        let rng = StdRng::seed_from_u64(timestamp);
-        println!("random seed = {}", timestamp);
-        // let rng = StdRng::seed_from_u64(0);
+        // let rng = StdRng::seed_from_u64(timestamp);
+        // println!("random seed = {}", timestamp);
+        let rng = StdRng::seed_from_u64(0);
 
         let mut game = Game {
             is_over: false,
@@ -76,17 +76,32 @@ impl Game {
     }
 
     pub fn update(&mut self, command: Command) {
+        if self.is_over || self.is_clear {
+            return;
+        }
+
         match command {
             Command::Open(x, y) => {
                 println!("open {} {}", x, y);
-                self.board[y][x].is_open = true;
+                self.open(x, y);
             }
             Command::Flag(x, y) => {
                 println!("flag {} {}", x, y);
-                self.board[y][x].is_flagged = true;
+                self.flag(x, y);
             }
             Command::None => {}
         }
+    }
+
+    pub fn open(&mut self, x: usize, y: usize) {
+        self.board[y][x].is_open = true;
+        if self.board[y][x].is_bomb {
+            self.is_over = true;
+            self.requested_sounds.push("crash.wav");
+        }
+    }
+    pub fn flag(&mut self, x: usize, y: usize) {
+        self.board[y][x].is_flagged = true;
     }
 }
 

@@ -200,7 +200,7 @@ fn render(
     for y in 0..BOARD_H {
         for x in 0..BOARD_W {
             let cell = &game.board[y as usize][x as usize];
-            if cell.is_bomb {
+            if cell.is_bomb && cell.is_open {
                 canvas.set_draw_color(Color::RGB(255, 128, 128));
                 canvas.fill_rect(Rect::new(
                     (CELL_SIZE * x) as i32,
