@@ -1,6 +1,10 @@
 use std::time;
 
-use rand::{rngs::StdRng, Rng, SeedableRng};
+use rand::{
+    distributions::{Distribution, Uniform},
+    rngs::StdRng,
+    Rng, SeedableRng,
+};
 
 pub const FPS: i32 = 30;
 pub const BOARD_W: i32 = 9;
@@ -10,8 +14,8 @@ pub const BOMB_COUNT: i32 = 10;
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Command {
     None,
-    Open,
-    Flag,
+    Open(usize, usize),
+    Flag(usize, usize),
 }
 
 #[derive(Debug, Default, Copy, Clone)]
@@ -55,16 +59,32 @@ impl Game {
     }
 
     pub fn init(&mut self) {
+        println!("game init");
+        let distribution = Uniform::from(0..(BOARD_W * BOARD_H) as usize);
         for _ in 0..BOMB_COUNT {
-            let r: usize = self.rng.gen_range(0..(BOARD_W * BOARD_H) as usize);
-            self.board[r / BOARD_W as usize][r % BOARD_W as usize].is_bomb = true;
+            loop {
+                let r: usize = distribution.sample(&mut self.rng);
+                let x = r % BOARD_W as usize;
+                let y = r / BOARD_W as usize;
+                if !self.board[y][x].is_bomb {
+                    self.board[y][x].is_bomb = true;
+                    println!("bomb {} {}", x, y);
+                    break;
+                }
+            }
         }
     }
 
     pub fn update(&mut self, command: Command) {
         match command {
-            Command::Open => {}
-            Command::Flag => {}
+            Command::Open(x, y) => {
+                println!("open {} {}", x, y);
+                self.board[y][x].is_open = true;
+            }
+            Command::Flag(x, y) => {
+                println!("flag {} {}", x, y);
+                self.board[y][x].is_flagged = true;
+            }
             Command::None => {}
         }
     }

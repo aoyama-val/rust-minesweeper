@@ -68,26 +68,11 @@ pub fn main() -> Result<(), String> {
     let mut event_pump = sdl_context.event_pump()?;
 
     let mut game = Game::new();
-    game.init();
 
     'running: loop {
         let started = SystemTime::now();
 
         let mut command = Command::None;
-        // let ks = event_pump.keyboard_state();
-        // if ks.is_scancode_pressed(sdl2::keyboard::Scancode::Left) {
-        //     command = Command::Left;
-        //     is_keydown = true;
-        // } else if ks.is_scancode_pressed(sdl2::keyboard::Scancode::Right) {
-        //     command = Command::Right;
-        //     is_keydown = true;
-        // } else if ks.is_scancode_pressed(sdl2::keyboard::Scancode::Up) {
-        //     command = Command::Up;
-        //     is_keydown = true;
-        // } else if ks.is_scancode_pressed(sdl2::keyboard::Scancode::Down) {
-        //     command = Command::Down;
-        //     is_keydown = true;
-        // }
 
         for event in event_pump.poll_iter() {
             match event {
@@ -106,17 +91,20 @@ pub fn main() -> Result<(), String> {
                 Event::MouseButtonDown {
                     x, y, mouse_btn, ..
                 } => {
-                    let x = (x as u32) / CELL_SIZE as u32;
-                    let y = (y as u32) / CELL_SIZE as u32;
+                    let x = (x as usize) / CELL_SIZE as usize;
+                    let y = (y as usize) / CELL_SIZE as usize;
                     if mouse_btn == MouseButton::Left {
-                        println!("left click {} {}", x, y);
+                        command = Command::Open(x, y);
                     } else if mouse_btn == MouseButton::Right {
-                        println!("right click {} {}", x, y);
+                        command = Command::Flag(x, y);
                     }
                 }
                 _ => {}
             }
         }
+
+        game.update(command);
+
         render(&mut canvas, &game, &mut resources)?;
 
         play_sounds(&mut game, &resources);
@@ -211,15 +199,42 @@ fn render(
 
     for y in 0..BOARD_H {
         for x in 0..BOARD_W {
-            render_font(
-                canvas,
-                font,
-                // format!("{}", game.board[y as usize][x as usize].number),
-                format!("{}", x % 10),
-                CELL_SIZE * x + 11,
-                CELL_SIZE * y - 2,
-                Color::RGBA(255, 255, 255, 255),
-            );
+            let cell = &game.board[y as usize][x as usize];
+            if cell.is_bomb {
+                canvas.set_draw_color(Color::RGB(255, 128, 128));
+                canvas.fill_rect(Rect::new(
+                    (CELL_SIZE * x) as i32,
+                    (CELL_SIZE * y) as i32,
+                    CELL_SIZE as u32,
+                    CELL_SIZE as u32,
+                ))?;
+            } else if cell.is_flagged {
+                canvas.set_draw_color(Color::RGB(255, 128, 255));
+                canvas.fill_rect(Rect::new(
+                    (CELL_SIZE * x) as i32,
+                    (CELL_SIZE * y) as i32,
+                    CELL_SIZE as u32,
+                    CELL_SIZE as u32,
+                ))?;
+            } else if cell.is_open {
+                canvas.set_draw_color(Color::RGB(0, 0, 0));
+                canvas.fill_rect(Rect::new(
+                    (CELL_SIZE * x) as i32,
+                    (CELL_SIZE * y) as i32,
+                    CELL_SIZE as u32,
+                    CELL_SIZE as u32,
+                ))?;
+                render_font(
+                    canvas,
+                    font,
+                    // format!("{}", game.board[y as usize][x as usize].number),
+                    format!("{}", x % 10),
+                    CELL_SIZE * x + 11,
+                    CELL_SIZE * y - 2,
+                    Color::RGBA(255, 255, 255, 255),
+                );
+            } else {
+            }
         }
     }
 
