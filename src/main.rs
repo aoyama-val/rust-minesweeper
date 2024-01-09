@@ -1,5 +1,4 @@
 use sdl2::event::Event;
-// use sdl2::gfx::primitives::DrawRenderer;
 use sdl2::keyboard::Keycode;
 use sdl2::mixer;
 use sdl2::mouse::MouseButton;
@@ -84,6 +83,11 @@ pub fn main() -> Result<(), String> {
                     match code {
                         Keycode::Escape => {
                             break 'running;
+                        }
+                        Keycode::Space => {
+                            if game.is_over || game.is_clear {
+                                game = Game::new();
+                            }
                         }
                         _ => {}
                     };
