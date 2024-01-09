@@ -123,8 +123,8 @@ impl Game {
                     if x < 0 || x >= BOARD_W || y < 0 || y >= BOARD_H {
                         continue;
                     }
-                    if x == 0 && y == 0 {
-                        return;
+                    if xi == 0 && yi == 0 {
+                        continue;
                     }
                     self.auto_open(x as usize, y as usize);
                 }
