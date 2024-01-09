@@ -267,8 +267,8 @@ fn render(
             canvas,
             font,
             "CLEAR!!".to_string(),
-            140,
-            240,
+            120,
+            150,
             Color::RGBA(255, 255, 0, 255),
         );
     }

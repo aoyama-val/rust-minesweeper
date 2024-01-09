@@ -43,9 +43,9 @@ impl Game {
             .duration_since(time::UNIX_EPOCH)
             .expect("SystemTime before UNIX EPOCH!")
             .as_secs();
-        // let rng = StdRng::seed_from_u64(timestamp);
-        // println!("random seed = {}", timestamp);
-        let rng = StdRng::seed_from_u64(0);
+        let rng = StdRng::seed_from_u64(timestamp);
+        println!("random seed = {}", timestamp);
+        // let rng = StdRng::seed_from_u64(0);
 
         let mut game = Game {
             is_over: false,
@@ -59,7 +59,6 @@ impl Game {
     }
 
     pub fn init(&mut self) {
-        println!("game init");
         let distribution = Uniform::from(0..(BOARD_W * BOARD_H) as usize);
         for _ in 0..BOMB_COUNT {
             loop {
@@ -68,7 +67,6 @@ impl Game {
                 let y = r / BOARD_W as usize;
                 if !self.board[y][x].is_bomb {
                     self.board[y][x].is_bomb = true;
-                    println!("bomb {} {}", x, y);
                     break;
                 }
             }
@@ -89,11 +87,9 @@ impl Game {
 
         match command {
             Command::Open(x, y) => {
-                println!("open {} {}", x, y);
                 self.open(x, y);
             }
             Command::Flag(x, y) => {
-                println!("flag {} {}", x, y);
                 self.flag(x, y);
             }
             Command::None => {}
@@ -110,6 +106,7 @@ impl Game {
             self.requested_sounds.push("crash.wav");
         } else {
             self.auto_open(x, y);
+            self.check_clear();
         }
     }
 
@@ -132,6 +129,20 @@ impl Game {
                     self.auto_open(x as usize, y as usize);
                 }
             }
+        }
+    }
+
+    pub fn check_clear(&mut self) {
+        let mut unopen_count = 0;
+        for y in 0..BOARD_H {
+            for x in 0..BOARD_W {
+                if !self.board[y as usize][x as usize].is_open {
+                    unopen_count += 1;
+                }
+            }
+        }
+        if unopen_count == BOMB_COUNT {
+            self.is_clear = true;
         }
     }
 
