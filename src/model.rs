@@ -73,6 +73,13 @@ impl Game {
                 }
             }
         }
+
+        for y in 0..BOARD_H {
+            for x in 0..BOARD_W {
+                self.board[y as usize][x as usize].number =
+                    self.count_bombs(x as usize, y as usize);
+            }
+        }
     }
 
     pub fn update(&mut self, command: Command) {
@@ -97,12 +104,34 @@ impl Game {
         if self.board[y][x].is_open {
             return;
         }
-        self.board[y][x].is_open = true;
         if self.board[y][x].is_bomb {
+            self.board[y][x].is_open = true;
             self.is_over = true;
             self.requested_sounds.push("crash.wav");
         } else {
-            self.board[y][x].number = self.count_bombs(x, y);
+            self.auto_open(x, y);
+        }
+    }
+
+    pub fn auto_open(&mut self, center_x: usize, center_y: usize) {
+        if self.board[center_y][center_x].is_open || self.board[center_y][center_x].is_bomb {
+            return;
+        }
+        self.board[center_y][center_x].is_open = true;
+        if self.board[center_y][center_x].number == 0 {
+            for yi in -1..=1 {
+                let y = center_y as i32 + yi;
+                for xi in -1..=1 {
+                    let x = center_x as i32 + xi;
+                    if x < 0 || x >= BOARD_W || y < 0 || y >= BOARD_H {
+                        continue;
+                    }
+                    if x == 0 && y == 0 {
+                        return;
+                    }
+                    self.auto_open(x as usize, y as usize);
+                }
+            }
         }
     }
 
