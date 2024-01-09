@@ -227,8 +227,8 @@ fn render(
                 render_font(
                     canvas,
                     font,
-                    // format!("{}", game.board[y as usize][x as usize].number),
-                    format!("{}", x % 10),
+                    format!("{}", game.board[y as usize][x as usize].number),
+                    // format!("{}", x % 10),
                     CELL_SIZE * x + 11,
                     CELL_SIZE * y - 2,
                     Color::RGBA(255, 255, 255, 255),

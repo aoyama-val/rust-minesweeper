@@ -94,14 +94,40 @@ impl Game {
     }
 
     pub fn open(&mut self, x: usize, y: usize) {
+        if self.board[y][x].is_open {
+            return;
+        }
         self.board[y][x].is_open = true;
         if self.board[y][x].is_bomb {
             self.is_over = true;
             self.requested_sounds.push("crash.wav");
+        } else {
+            self.board[y][x].number = self.count_bombs(x, y);
         }
     }
+
     pub fn flag(&mut self, x: usize, y: usize) {
-        self.board[y][x].is_flagged = true;
+        if self.board[y][x].is_open {
+            return;
+        }
+        self.board[y][x].is_flagged = !self.board[y][x].is_flagged;
+    }
+
+    pub fn count_bombs(&self, x: usize, y: usize) -> i32 {
+        let mut result = 0;
+        for yi in -1..=1 {
+            let y2 = y as i32 + yi;
+            for xi in -1..=1 {
+                let x2 = x as i32 + xi;
+                if x2 < 0 || x2 >= BOARD_W || y2 < 0 || y2 >= BOARD_H {
+                    continue;
+                }
+                if self.board[y2 as usize][x2 as usize].is_bomb {
+                    result += 1;
+                }
+            }
+        }
+        result
     }
 }
 
